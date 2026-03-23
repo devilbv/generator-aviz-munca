@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext'
 import { toast } from 'sonner'
 
 const EMPTY_COMPANY = {
+  employerType: 'juridica', // 'juridica' | 'fizica'
   companyName: '',
   cui: '',
   registryNumber: '',
@@ -11,6 +12,15 @@ const EMPTY_COMPANY = {
   administratorName: '',
   ajofmCertificateNumber1: '',
   ajofmCertificateNumber2: '',
+  // Persoana fizica
+  pfName: '',
+  pfCNP: '',
+  pfIdSeries: '',
+  pfIdNumber: '',
+  pfIdIssueDate: '',
+  pfIdExpiryDate: '',
+  pfAddress: '',
+  // Reprezentant
   representativeName: '',
   representativeCNP: '',
   representativeAddress: '',
