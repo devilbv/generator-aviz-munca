@@ -40,11 +40,6 @@ export const CSV_COLUMN_MAP = {
   'Cod Țară':         'passportCountryCode',
   'Data Emiterii':    'passportIssueDate',
   'Data Expirării':   'passportExpiryDate',
-  'Funcția':          'position',
-  'Cod COR':          'corCode',
-  'Salariu Brut':     'monthlySalary',
-  'Loc Activitate':   'workLocation',
-  'Zile Concediu':    'vacationDays',
 }
 
 export const CSV_TEMPLATE_ROWS = [
