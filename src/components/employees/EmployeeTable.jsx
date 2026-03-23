@@ -53,8 +53,10 @@ export default function EmployeeTable({ employees, addRow, deleteRow, updateRow,
     for (const file of files) {
       try {
         const base64 = await fileToBase64(file)
+        const { data: { session } } = await supabase.auth.getSession()
         const { data, error } = await supabase.functions.invoke('parse-passport', {
           body: { image: base64, filename: file.name, mimeType: file.type },
+          headers: { Authorization: `Bearer ${session?.access_token}` },
         })
         if (error) throw error
         importFromOCR(data)

@@ -45,8 +45,10 @@ export default function DocumentGenerator({ company, employees }) {
     setGenerating(g => ({ ...g, [key]: true }))
 
     try {
+      const { data: { session } } = await supabase.auth.getSession()
       const { data, error } = await supabase.functions.invoke('generate-single-document', {
         body: { company, employee, documentType: docType },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
       })
       if (error) throw error
 
@@ -66,13 +68,25 @@ export default function DocumentGenerator({ company, employees }) {
     setGeneratingAll(g => ({ ...g, [employee.id]: true }))
 
     try {
+      const { data: { session } } = await supabase.auth.getSession()
       const { data, error } = await supabase.functions.invoke('generate-work-permit', {
         body: { company, employee },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
       })
       if (error) throw error
 
       const blob = new Blob([data], { type: 'application/zip' })
       downloadBlob(blob, `Documente_${safeName(employee.employeeName)}.zip`)
+
+      // Salvează în istoric
+      await supabase.from('work_permits').insert({
+        user_id:          session.user.id,
+        company_snapshot: company,
+        employees:        [employee],
+        document_types:   DOCUMENT_TYPES.map(d => d.slug),
+        status:           'generated',
+      })
+
       toast.success(`Dosar complet generat pentru ${employee.employeeName}`)
     } catch (err) {
       toast.error('Eroare la generare: ' + (err.message || 'necunoscută'))
