@@ -21,12 +21,16 @@ export default function Navbar() {
   if (!user) return null
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex h-14 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-semibold text-primary">
-          <FileText className="h-5 w-5" />
-          <span className="hidden sm:inline">Generator Dosare Aviz de Muncă</span>
-          <span className="sm:hidden">Aviz Muncă</span>
+    <header className="sticky top-0 z-40 border-b bg-white shadow-sm">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 flex h-14 items-center justify-between">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+            <FileText className="h-4 w-4 text-white" />
+          </div>
+          <div className="hidden sm:block">
+            <p className="font-semibold text-sm leading-tight text-gray-900">Generator Dosare Aviz de Muncă</p>
+            <p className="text-xs text-gray-400 leading-tight">Automatizare completă</p>
+          </div>
         </Link>
 
         <div className="flex items-center gap-2">
