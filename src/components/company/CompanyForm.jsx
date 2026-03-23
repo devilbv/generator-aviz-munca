@@ -3,11 +3,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, Loader2, Building2, User, Plus } from 'lucide-react'
+import { Search, Loader2, Building2, User, Plus, Trash2 } from 'lucide-react'
 
-export default function CompanyForm({ company, updateField, savedCompanies, loadSavedCompany, lookupCUI, lookingUp, saveCompany, saving, onContinue }) {
-  const [saveChecked, setSaveChecked]           = useState(true)
+export default function CompanyForm({ company, updateField, savedCompanies, loadSavedCompany, lookupCUI, lookingUp, saveCompany, saving, deleteCompany, onContinue }) {
+  const [saveChecked, setSaveChecked]               = useState(true)
   const [showRepresentative, setShowRepresentative] = useState(false)
+  const [selectedCompanyId, setSelectedCompanyId]   = useState('')
 
   const handleSaveAndContinue = async () => {
     if (saveChecked) await saveCompany()
@@ -30,7 +31,7 @@ export default function CompanyForm({ company, updateField, savedCompanies, load
       <div className="rounded-xl border bg-white p-4 shadow-sm">
         <Label className="text-sm font-medium text-gray-700 mb-2 block">Selectează firmă salvată</Label>
         <div className="flex gap-2">
-          <Select onValueChange={loadSavedCompany}>
+          <Select value={selectedCompanyId} onValueChange={(val) => { setSelectedCompanyId(val); loadSavedCompany(val) }}>
             <SelectTrigger className="flex-1">
               <SelectValue placeholder={savedCompanies.length ? 'Alege o firmă...' : 'Nicio firmă salvată'} />
             </SelectTrigger>
@@ -40,7 +41,17 @@ export default function CompanyForm({ company, updateField, savedCompanies, load
               ))}
             </SelectContent>
           </Select>
+          {selectedCompanyId && (
+            <Button
+              variant="outline" size="sm"
+              className="gap-1 shrink-0 text-destructive hover:text-destructive border-destructive/30 hover:border-destructive"
+              onClick={() => { deleteCompany(selectedCompanyId); setSelectedCompanyId('') }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
           <Button variant="outline" size="sm" className="gap-1 shrink-0" onClick={() => {
+            setSelectedCompanyId('');
             ['companyName','cui','registryNumber','companyAddress','administratorName',
              'ajofmCertificateNumber1','ajofmCertificateNumber2','representativeName',
              'representativeCNP','representativeAddress','representativeIdSeries',

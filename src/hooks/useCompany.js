@@ -128,5 +128,15 @@ export function useCompany() {
     }
   }
 
-  return { company, updateField, savedCompanies, loadSavedCompany, lookupCUI, lookingUp, saveCompany, saving }
+  const deleteCompany = async (id) => {
+    try {
+      await supabase.from('companies').delete().eq('id', id)
+      setSavedCompanies(prev => prev.filter(c => c.id !== id))
+      toast.success('Firma a fost ștearsă')
+    } catch (err) {
+      toast.error('Eroare la ștergere: ' + err.message)
+    }
+  }
+
+  return { company, updateField, savedCompanies, loadSavedCompany, lookupCUI, lookingUp, saveCompany, saving, deleteCompany }
 }
