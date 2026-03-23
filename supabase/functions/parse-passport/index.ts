@@ -65,10 +65,17 @@ Return ONLY valid JSON, no markdown, no explanation.`,
     }
 
     const ai = await resp.json()
-    const text = ai.content?.[0]?.text?.trim() || '{}'
-    console.log('AI response:', text)
+    let text = ai.content?.[0]?.text?.trim() || '{}'
+    console.log('AI raw response:', text)
 
-    const data = JSON.parse(text)
+    // Curata markdown code blocks daca exista
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+
+    // Extrage primul JSON object din text
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) throw new Error('No JSON found in AI response: ' + text.substring(0, 200))
+
+    const data = JSON.parse(jsonMatch[0])
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
