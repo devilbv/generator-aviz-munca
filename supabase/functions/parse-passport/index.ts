@@ -1,12 +1,9 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Uses Claude AI via Anthropic API to extract passport data from image
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -17,6 +14,11 @@ serve(async (req) => {
 
     const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')
     if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not set')
+
+    // Claude accepta doar imagini, nu PDF
+    const mediaType = mimeType?.startsWith('image/') ? mimeType : 'image/jpeg'
+
+    console.log('Scanning passport:', filename, 'mimeType:', mediaType)
 
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -33,37 +35,46 @@ serve(async (req) => {
           content: [
             {
               type: 'image',
-              source: { type: 'base64', media_type: mimeType || 'image/jpeg', data: image },
+              source: { type: 'base64', media_type: mediaType, data: image },
             },
             {
               type: 'text',
-              text: `Extract passport data from this image and return ONLY a JSON object with these fields (use empty string if not found):
+              text: `Extract passport data from this image and return ONLY a JSON object with these exact fields (use empty string if not found):
 {
-  "employeeName": "full name as on passport",
-  "birthDate": "YYYY-MM-DD",
-  "birthPlace": "city/country",
-  "citizenship": "nationality",
+  "employeeName": "full name in UPPERCASE as on passport",
+  "birthDate": "DD.MM.YYYY format",
+  "birthPlace": "city or country of birth",
+  "citizenship": "nationality/country name",
   "passportNumber": "passport number",
-  "passportCountryCode": "3-letter country code",
-  "passportIssueDate": "YYYY-MM-DD",
-  "passportExpiryDate": "YYYY-MM-DD"
+  "passportCountryCode": "3-letter ISO country code e.g. ETH, ROU",
+  "passportIssueDate": "DD.MM.YYYY format",
+  "passportExpiryDate": "DD.MM.YYYY format"
 }
-Return ONLY valid JSON, no markdown.`,
+Return ONLY valid JSON, no markdown, no explanation.`,
             },
           ],
         }],
       }),
     })
 
-    if (!resp.ok) throw new Error('AI API error: ' + resp.statusText)
+    console.log('Anthropic status:', resp.status)
+
+    if (!resp.ok) {
+      const errText = await resp.text()
+      throw new Error(`Anthropic API error ${resp.status}: ${errText}`)
+    }
+
     const ai = await resp.json()
-    const text = ai.content?.[0]?.text || '{}'
+    const text = ai.content?.[0]?.text?.trim() || '{}'
+    console.log('AI response:', text)
+
     const data = JSON.parse(text)
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
+    console.error('parse-passport error:', err.message)
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
