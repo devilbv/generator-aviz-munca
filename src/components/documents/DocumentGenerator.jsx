@@ -27,9 +27,16 @@ export default function DocumentGenerator({ company, employees }) {
   const [generatingAll, setGeneratingAll] = useState({}) // { employeeId: true }
 
   const validateRequired = () => {
-    if (!company.companyName || !company.cui) {
-      toast.error('Vă rugăm să completați câmpurile obligatorii (Denumire firmă, CUI).')
-      return false
+    if (company.employerType === 'fizica') {
+      if (!company.pfName || !company.pfCNP) {
+        toast.error('Vă rugăm să completați câmpurile obligatorii (Nume, CNP).')
+        return false
+      }
+    } else {
+      if (!company.companyName || !company.cui) {
+        toast.error('Vă rugăm să completați câmpurile obligatorii (Denumire firmă, CUI).')
+        return false
+      }
     }
     const invalid = employees.filter(e => !e.employeeName || !e.passportNumber)
     if (invalid.length) {

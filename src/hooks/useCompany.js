@@ -100,9 +100,16 @@ export function useCompany() {
   }
 
   const saveCompany = async () => {
-    if (!company.companyName || !company.cui) {
-      toast.error('Vă rugăm să completați câmpurile obligatorii (Denumire firmă, CUI).')
-      return
+    if (company.employerType === 'fizica') {
+      if (!company.pfName || !company.pfCNP) {
+        toast.error('Vă rugăm să completați câmpurile obligatorii (Nume, CNP).')
+        return
+      }
+    } else {
+      if (!company.companyName || !company.cui) {
+        toast.error('Vă rugăm să completați câmpurile obligatorii (Denumire firmă, CUI).')
+        return
+      }
     }
     setSaving(true)
     try {
