@@ -1,5 +1,6 @@
 import JSZip from 'https://esm.sh/jszip@3.10.1'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { generateDocx, ro } from '../_shared/docx.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

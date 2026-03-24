@@ -1,19 +1,9 @@
-import JSZip from 'https://esm.sh/jszip@3.10.1'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { generateDocx, ro } from '../_shared/docx.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-function ro(d: string): string {
-  if (!d) return ''
-  if (/^\d{2}\.\d{2}\.\d{4}$/.test(d)) return d
-  if (/^\d{4}-\d{2}-\d{2}/.test(d)) {
-    const [y, m, day] = d.split('-')
-    return `${day}.${m}.${y}`
-  }
-  return d
 }
 
 function buildDoc(docType: string, c: any, e: any, today: string): string[] {
@@ -262,24 +252,6 @@ function buildDoc(docType: string, c: any, e: any, today: string): string[] {
   return docs[docType] || [`Document: ${docType}`, `Angajat: ${emp}`, `Data: ${today}`]
 }
 
-async function generateDocx(paragraphs: string[]): Promise<Uint8Array> {
-  const bodyXml = paragraphs.map(p => {
-    if (p === '') return '<w:p/>'
-    const isBold = p.startsWith('**') && p.endsWith('**')
-    const text = isBold ? p.slice(2, -2) : p
-    const rpr = isBold ? '<w:rPr><w:b/><w:sz w:val="28"/></w:rPr>' : '<w:rPr><w:sz w:val="22"/></w:rPr>'
-    const esc = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    return `<w:p><w:r>${rpr}<w:t xml:space="preserve">${esc}</w:t></w:r></w:p>`
-  }).join('\n')
-
-  const zip = new JSZip()
-  zip.file('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`)
-  zip.file('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`)
-  zip.file('word/_rels/document.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>`)
-  zip.file('word/document.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${bodyXml}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1701" w:header="709" w:footer="709" w:gutter="0"/></w:sectPr></w:body></w:document>`)
-
-  return await zip.generateAsync({ type: 'uint8array' })
-}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
