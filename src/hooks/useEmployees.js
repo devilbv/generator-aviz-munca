@@ -49,11 +49,20 @@ export function useEmployees() {
   }
 
   const importFromOCR = (ocrData) => {
-    if (Array.isArray(ocrData)) {
-      setEmployees(e => [...e, ...ocrData.map(d => newEmployee(d))])
-    } else {
-      setEmployees(e => [...e, newEmployee(ocrData)])
-    }
+    const dataList = Array.isArray(ocrData) ? ocrData : [ocrData]
+    setEmployees(prev => {
+      let rows = [...prev]
+      for (const d of dataList) {
+        // Cauta primul rand gol (fara nume si fara pasaport)
+        const emptyIdx = rows.findIndex(e => !e.employeeName && !e.passportNumber)
+        if (emptyIdx !== -1) {
+          rows[emptyIdx] = { ...rows[emptyIdx], ...d }
+        } else {
+          rows = [...rows, newEmployee(d)]
+        }
+      }
+      return rows
+    })
   }
 
   const clearAll = () => setEmployees([newEmployee()])
