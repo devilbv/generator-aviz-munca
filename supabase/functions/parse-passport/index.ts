@@ -15,16 +15,21 @@ Deno.serve(async (req) => {
     const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')
     if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not set')
 
-    // Claude accepta doar imagini, nu PDF
-    const mediaType = mimeType?.startsWith('image/') ? mimeType : 'image/jpeg'
+    const isPDF = mimeType === 'application/pdf' || filename?.toLowerCase().endsWith('.pdf')
 
-    console.log('Scanning passport:', filename, 'mimeType:', mediaType)
+    console.log('Scanning:', filename, 'isPDF:', isPDF, 'mimeType:', mimeType)
+
+    // Construieste content-ul corect pentru PDF vs imagine
+    const fileContent = isPDF
+      ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: image } }
+      : { type: 'image', source: { type: 'base64', media_type: mimeType || 'image/jpeg', data: image } }
 
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'x-api-key': ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'pdfs-2024-09-25',
         'content-type': 'application/json',
       },
       body: JSON.stringify({
@@ -33,13 +38,10 @@ Deno.serve(async (req) => {
         messages: [{
           role: 'user',
           content: [
-            {
-              type: 'image',
-              source: { type: 'base64', media_type: mediaType, data: image },
-            },
+            fileContent,
             {
               type: 'text',
-              text: `Extract passport data from this image and return ONLY a JSON object with these exact fields (use empty string if not found):
+              text: `Extract passport data from this document and return ONLY a JSON object with these exact fields (use empty string if not found):
 {
   "employeeName": "full name in UPPERCASE as on passport",
   "birthDate": "DD.MM.YYYY format",
