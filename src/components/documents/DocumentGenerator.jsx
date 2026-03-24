@@ -46,13 +46,23 @@ export default function DocumentGenerator({ company, employees }) {
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      const { data, error } = await supabase.functions.invoke('generate-single-document', {
-        body: { company, employee, documentType: docType },
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-      })
-      if (error) throw error
-
-      const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-single-document`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ company, employee, documentType: docType }),
+        }
+      )
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: resp.statusText }))
+        throw new Error(err.error || resp.statusText)
+      }
+      const blob = await resp.blob()
       const docLabel = DOCUMENT_TYPES.find(d => d.slug === docType)?.label || docType
       downloadBlob(blob, `${docLabel}_${safeName(employee.employeeName)}.docx`)
       toast.success(`Document generat: ${docLabel}`)
@@ -69,13 +79,23 @@ export default function DocumentGenerator({ company, employees }) {
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      const { data, error } = await supabase.functions.invoke('generate-work-permit', {
-        body: { company, employee },
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-      })
-      if (error) throw error
-
-      const blob = new Blob([data], { type: 'application/zip' })
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-work-permit`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ company, employee }),
+        }
+      )
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: resp.statusText }))
+        throw new Error(err.error || resp.statusText)
+      }
+      const blob = await resp.blob()
       downloadBlob(blob, `Documente_${safeName(employee.employeeName)}.zip`)
 
       // Salvează în istoric
