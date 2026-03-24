@@ -184,7 +184,7 @@ export default function CompanyForm({ company, updateField, savedCompanies, load
               {scanningId ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
               Scanează Buletin
             </Button>
-            <input ref={idScanRef} type="file" accept="image/*" className="hidden" onChange={handleIdScan} />
+            <input ref={idScanRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="hidden" onChange={handleIdScan} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1 sm:col-span-2">
