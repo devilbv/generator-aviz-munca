@@ -51,7 +51,7 @@ export default function AuthForm() {
             <FileText className="h-7 w-7" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Generator Dosare</h1>
-          <p className="mt-1 text-sm text-gray-600">Aviz de munca Cristina P</p>
+          <p className="mt-1 text-sm text-gray-600">Aviz de munca</p>
         </div>
 
         <Card className="shadow-lg">
