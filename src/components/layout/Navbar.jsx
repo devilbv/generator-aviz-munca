@@ -52,17 +52,17 @@ export default function Navbar() {
               <Link to="/pricing">
                 <span className={`hidden sm:inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full cursor-pointer hover:opacity-80 transition ${PLAN_COLORS[plan] || PLAN_COLORS.free}`}>
                   <Zap className="h-3 w-3" />
-                  {planLabel}
-                  {docsLimit !== -1 && ` · ${docsUsed}/${docsLimit}`}
+                  {plan === 'free'
+                    ? `Gratuit · ${credits} dosare`
+                    : `${planLabel}${docsLimit !== -1 ? ` · ${docsUsed}/${docsLimit}` : ''}`}
                 </span>
               </Link>
             )}
 
-            {/* Credite / Generări rămase */}
-            {!loading && credits > 0 && (
+            {/* Credite extra (doar pentru planuri platite) */}
+            {!loading && plan !== 'free' && credits > 0 && (
               <span className="hidden sm:inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-700">
-                <CreditCard className="h-3 w-3" />
-                {plan === 'free' ? `${credits} dosare gratuite` : `${credits} credite`}
+                <CreditCard className="h-3 w-3" /> {credits} credite
               </span>
             )}
 
