@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { useBilling } from '@/hooks/useBilling'
 import { useAuth } from '@/context/AuthContext'
 import { Navigate } from 'react-router-dom'
+import BillingDetailsModal from '@/components/billing/BillingDetailsModal'
 
 const PLANS = [
   {
@@ -57,12 +58,19 @@ const CREDITS = [
 export default function PricingPage() {
   const [yearly, setYearly]   = useState(false)
   const [loading, setLoading] = useState({})
+  const [billingModal, setBillingModal] = useState(null) // { type, key }
   const { checkout, plan: currentPlan } = useBilling()
   const { session } = useAuth()
 
   if (!session) return <Navigate to="/" replace />
 
-  const handleCheckout = async (type, key) => {
+  const handleCheckout = (type, key) => {
+    setBillingModal({ type, key })
+  }
+
+  const handleBillingConfirm = async () => {
+    const { type, key } = billingModal
+    setBillingModal(null)
     setLoading(l => ({ ...l, [key]: true }))
     await checkout(type, key)
     setLoading(l => ({ ...l, [key]: false }))
@@ -70,6 +78,12 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
+      {billingModal && (
+        <BillingDetailsModal
+          onConfirm={handleBillingConfirm}
+          onClose={() => setBillingModal(null)}
+        />
+      )}
       <div className="max-w-5xl mx-auto space-y-12">
 
         {/* Header */}

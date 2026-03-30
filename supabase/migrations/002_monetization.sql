@@ -76,6 +76,12 @@ begin
 end;
 $$;
 
+-- Date facturare
+alter table public.user_profiles
+  add column if not exists billing_company text,
+  add column if not exists billing_cif     text,
+  add column if not exists billing_address text;
+
 -- Index
 create index if not exists user_profiles_stripe_idx on public.user_profiles(stripe_customer_id);
 create index if not exists subs_user_idx            on public.subscriptions(user_id);

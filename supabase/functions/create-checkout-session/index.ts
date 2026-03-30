@@ -73,6 +73,7 @@ Deno.serve(async (req) => {
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         mode: 'subscription',
+        payment_method_types: ['card'],
         line_items: [{ price: price.id, quantity: 1 }],
         success_url: successUrl + '?session_id={CHECKOUT_SESSION_ID}&type=subscription&plan=' + priceKey.split('_')[0],
         cancel_url: cancelUrl,
@@ -98,6 +99,7 @@ Deno.serve(async (req) => {
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         mode: 'payment',
+        payment_method_types: ['card'],
         line_items: [{ price: price.id, quantity: 1 }],
         success_url: successUrl + '?session_id={CHECKOUT_SESSION_ID}&type=credits&credits=' + pkg.credits,
         cancel_url: cancelUrl,
