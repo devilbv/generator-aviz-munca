@@ -58,10 +58,11 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* Credite */}
+            {/* Credite / Generări rămase */}
             {!loading && credits > 0 && (
               <span className="hidden sm:inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-700">
-                <CreditCard className="h-3 w-3" /> {credits} credite
+                <CreditCard className="h-3 w-3" />
+                {plan === 'free' ? `${credits} generări gratuite` : `${credits} credite`}
               </span>
             )}
 
