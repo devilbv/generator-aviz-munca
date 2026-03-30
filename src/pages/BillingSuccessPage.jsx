@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 
 export default function BillingSuccessPage() {
   const [searchParams] = useSearchParams()
-  const { fetchProfile } = useBilling()
+  const { refetch } = useBilling()
   const [loading, setLoading] = useState(true)
 
   const type    = searchParams.get('type')
@@ -17,7 +17,7 @@ export default function BillingSuccessPage() {
     // Incearca sa reimprospateze profilul de cateva ori
     let attempts = 0
     const interval = setInterval(async () => {
-      await fetchProfile()
+      await refetch()
       attempts++
       if (attempts >= 5) {
         clearInterval(interval)

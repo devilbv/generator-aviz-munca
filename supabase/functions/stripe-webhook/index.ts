@@ -49,6 +49,14 @@ Deno.serve(async (req) => {
         })
       }
     }
+
+    if (session.mode === 'subscription') {
+      const planKey = session.metadata?.plan_key || ''
+      const plan    = planKey.split('_')[0] || 'basic'
+      if (plan && plan !== 'free') {
+        await supabase.from('user_profiles').update({ plan, docs_this_month: 0, updated_at: new Date().toISOString() }).eq('id', userId)
+      }
+    }
   }
 
   if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated') {
