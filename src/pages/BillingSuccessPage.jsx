@@ -14,11 +14,17 @@ export default function BillingSuccessPage() {
   const credits = searchParams.get('credits')
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
+    // Incearca sa reimprospateze profilul de cateva ori
+    let attempts = 0
+    const interval = setInterval(async () => {
       await fetchProfile()
-      setLoading(false)
-    }, 2000) // asteapta webhook-ul sa proceseze
-    return () => clearTimeout(timer)
+      attempts++
+      if (attempts >= 5) {
+        clearInterval(interval)
+        setLoading(false)
+      }
+    }, 1500)
+    return () => clearInterval(interval)
   }, [])
 
   return (
