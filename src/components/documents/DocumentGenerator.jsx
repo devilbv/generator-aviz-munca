@@ -54,7 +54,7 @@ export default function DocumentGenerator({ company, employees }) {
   const generateSingle = async (employee, docType) => {
     if (!validateRequired()) return
     if (!canGenerate()) {
-      toast.error('Ai atins limita de documente. Upgradează planul sau cumpără credite.')
+      toast.error('Ai atins limita de dosare gratuite. Upgradează planul sau cumpără credite.')
       return
     }
     const key = `${employee.id}_${docType}`
@@ -93,7 +93,7 @@ export default function DocumentGenerator({ company, employees }) {
   const generateAll = async (employee) => {
     if (!validateRequired()) return
     if (!canGenerate()) {
-      toast.error('Ai atins limita de documente. Upgradează planul sau cumpără credite.')
+      toast.error('Ai atins limita de dosare gratuite. Upgradează planul sau cumpără credite.')
       return
     }
     setGeneratingAll(g => ({ ...g, [employee.id]: true }))
@@ -145,9 +145,8 @@ export default function DocumentGenerator({ company, employees }) {
         <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
           <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
           <div className="flex-1 text-sm">
-            <p className="font-medium text-red-700">Ai atins limita de documente</p>
+            <p className="font-medium text-red-700">Ai atins limita de dosare gratuite</p>
             <p className="text-red-600 mt-0.5">
-              {docsLimit !== -1 && `Ai folosit ${docsUsed}/${docsLimit} documente luna aceasta.`}{' '}
               <Link to="/pricing" className="underline font-semibold">Upgradează planul</Link> sau cumpără credite pentru a continua.
             </p>
           </div>
