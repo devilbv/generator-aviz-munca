@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { toast } from 'sonner'
 
-const PLAN_LIMITS = { free: 10, basic: 50, pro: 200, business: -1 }
+const PLAN_LIMITS = { free: 0, basic: 50, pro: 200, business: -1 }
 const PLAN_LABELS = { free: 'Gratuit', basic: 'Basic', pro: 'Pro', business: 'Business' }
 
 export function useBilling() {
@@ -41,8 +41,16 @@ export function useBilling() {
     const resetAt = new Date(profile.month_reset_at)
     const sameMonth = now.getFullYear() === resetAt.getFullYear() && now.getMonth() === resetAt.getMonth()
 
-    if (!sameMonth) {
-      // Reset lunar
+    if (limit === 0) {
+      // Plan free - foloseste doar credite
+      if ((profile.credits || 0) > 0) {
+        await supabase.from('user_profiles').update({ credits: profile.credits - 1 }).eq('id', user.id)
+        await supabase.from('credit_transactions').insert({
+          user_id: user.id, amount: -1, type: 'usage', description: 'Generare document',
+        })
+      }
+    } else if (!sameMonth) {
+      // Reset lunar pentru planuri platite
       await supabase.from('user_profiles').update({
         docs_this_month: 1,
         month_reset_at:  now.toISOString().split('T')[0].slice(0, 7) + '-01',
@@ -50,7 +58,7 @@ export function useBilling() {
     } else if ((profile.docs_this_month || 0) < limit) {
       await supabase.from('user_profiles').update({ docs_this_month: (profile.docs_this_month || 0) + 1 }).eq('id', user.id)
     } else if ((profile.credits || 0) > 0) {
-      // Foloseste credit
+      // Credite extra dupa limita lunara
       await supabase.from('user_profiles').update({ credits: profile.credits - 1 }).eq('id', user.id)
       await supabase.from('credit_transactions').insert({
         user_id: user.id, amount: -1, type: 'usage', description: 'Generare document',
