@@ -6,7 +6,7 @@
 create table if not exists public.user_profiles (
   id                  uuid primary key references auth.users on delete cascade,
   plan                text not null default 'free' check (plan in ('free','basic','pro','business')),
-  credits             int  not null default 5,
+  credits             int  not null default 10,
   docs_this_month     int  not null default 0,
   month_reset_at      date not null default date_trunc('month', now())::date,
   stripe_customer_id  text,
@@ -54,7 +54,7 @@ create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer as $$
 begin
   insert into public.user_profiles (id, plan, credits)
-  values (new.id, 'free', 5)
+  values (new.id, 'free', 10)
   on conflict (id) do nothing;
   return new;
 end;

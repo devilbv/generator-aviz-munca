@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { toast } from 'sonner'
 
-const PLAN_LIMITS = { free: 5, basic: 50, pro: 200, business: -1 }
+const PLAN_LIMITS = { free: 10, basic: 50, pro: 200, business: -1 }
 const PLAN_LABELS = { free: 'Gratuit', basic: 'Basic', pro: 'Pro', business: 'Business' }
 
 export function useBilling() {

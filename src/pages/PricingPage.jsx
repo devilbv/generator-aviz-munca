@@ -171,7 +171,7 @@ export default function PricingPage() {
 
         {/* Plan gratuit */}
         <div className="rounded-2xl border bg-white p-6 text-center text-sm text-gray-500">
-          Planul gratuit include <strong>5 documente</strong> la înregistrare. Creditele rămase se pot folosi oricând.
+          Planul gratuit include <strong>10 documente</strong> la înregistrare. Creditele rămase se pot folosi oricând.
         </div>
       </div>
     </div>
