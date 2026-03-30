@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -6,8 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { DOCUMENT_TYPES } from '@/lib/constants'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
+import { useBilling } from '@/hooks/useBilling'
 import { toast } from 'sonner'
-import { Download, FileDown, Loader2, FileText, Package } from 'lucide-react'
+import { Download, FileDown, Loader2, FileText, Package, AlertTriangle } from 'lucide-react'
 
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob)
@@ -22,9 +24,12 @@ function safeName(name) {
 
 export default function DocumentGenerator({ company, employees }) {
   const { session } = useAuth()
+  const { canGenerate, recordUsage, docsUsed, docsLimit, credits, loading: billingLoading } = useBilling()
   const [selectedDocType, setSelectedDocType] = useState('')
   const [generating, setGenerating] = useState({}) // { employeeId_docType: true }
   const [generatingAll, setGeneratingAll] = useState({}) // { employeeId: true }
+
+  const limitReached = !billingLoading && !canGenerate()
 
   const validateRequired = () => {
     if (company.employerType === 'fizica') {
@@ -48,6 +53,10 @@ export default function DocumentGenerator({ company, employees }) {
 
   const generateSingle = async (employee, docType) => {
     if (!validateRequired()) return
+    if (!canGenerate()) {
+      toast.error('Ai atins limita de documente. Upgradează planul sau cumpără credite.')
+      return
+    }
     const key = `${employee.id}_${docType}`
     setGenerating(g => ({ ...g, [key]: true }))
 
@@ -72,6 +81,7 @@ export default function DocumentGenerator({ company, employees }) {
       const blob = await resp.blob()
       const docLabel = DOCUMENT_TYPES.find(d => d.slug === docType)?.label || docType
       downloadBlob(blob, `${docLabel}_${safeName(employee.employeeName)}.docx`)
+      await recordUsage()
       toast.success(`Document generat: ${docLabel}`)
     } catch (err) {
       toast.error('Eroare la generare: ' + (err.message || 'necunoscută'))
@@ -82,6 +92,10 @@ export default function DocumentGenerator({ company, employees }) {
 
   const generateAll = async (employee) => {
     if (!validateRequired()) return
+    if (!canGenerate()) {
+      toast.error('Ai atins limita de documente. Upgradează planul sau cumpără credite.')
+      return
+    }
     setGeneratingAll(g => ({ ...g, [employee.id]: true }))
 
     try {
@@ -114,6 +128,7 @@ export default function DocumentGenerator({ company, employees }) {
         status:           'generated',
       })
 
+      await recordUsage()
       toast.success(`Dosar complet generat pentru ${employee.employeeName}`)
     } catch (err) {
       toast.error('Eroare la generare: ' + (err.message || 'necunoscută'))
@@ -126,6 +141,18 @@ export default function DocumentGenerator({ company, employees }) {
 
   return (
     <div className="space-y-6">
+      {limitReached && (
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+          <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+          <div className="flex-1 text-sm">
+            <p className="font-medium text-red-700">Ai atins limita de documente</p>
+            <p className="text-red-600 mt-0.5">
+              {docsLimit !== -1 && `Ai folosit ${docsUsed}/${docsLimit} documente luna aceasta.`}{' '}
+              <Link to="/pricing" className="underline font-semibold">Upgradează planul</Link> sau cumpără credite pentru a continua.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-3">
         <div className="space-y-1 flex-1">
           <p className="text-sm font-medium">Document individual</p>
@@ -177,7 +204,7 @@ export default function DocumentGenerator({ company, employees }) {
                       {selectedDocType && (
                         <Button
                           variant="outline" size="sm"
-                          disabled={!!generating[`${emp.id}_${selectedDocType}`]}
+                          disabled={!!generating[`${emp.id}_${selectedDocType}`] || limitReached}
                           onClick={() => generateSingle(emp, selectedDocType)}
                           className="gap-1"
                         >
@@ -192,7 +219,7 @@ export default function DocumentGenerator({ company, employees }) {
                       )}
                       <Button
                         size="sm"
-                        disabled={isGenAll}
+                        disabled={isGenAll || limitReached}
                         onClick={() => generateAll(emp)}
                         className="gap-1"
                       >
