@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 
 const PLAN_LIMITS = { free: 0, basic: 50, pro: 200, business: -1 }
 // Pentru free: 1 credit = 1 generare completa (indiferent cate documente)
-const PLAN_LABELS = { free: 'Gratuit', basic: 'Basic', pro: 'Pro', business: 'Business' }
+const PLAN_LABELS = { free: 'Gratuit', basic: 'Starter', pro: 'Pro', business: 'Business' }
 
 export function useBilling() {
   const { user, session } = useAuth()

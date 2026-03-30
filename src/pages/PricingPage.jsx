@@ -6,13 +6,13 @@ import { useAuth } from '@/context/AuthContext'
 import { Navigate } from 'react-router-dom'
 import BillingDetailsModal from '@/components/billing/BillingDetailsModal'
 
-const PLAN_LABELS = { free: 'Gratuit', basic: 'Basic', pro: 'Pro', business: 'Business' }
+const PLAN_LABELS = { free: 'Gratuit', basic: 'Starter', pro: 'Pro', business: 'Business' }
 const PLAN_LIMITS = { free: 0, basic: 50, pro: 200, business: -1 }
 
 const PLANS = [
   {
     key: 'basic',
-    name: 'Basic',
+    name: 'Starter',
     icon: Zap,
     monthly: 49,
     yearly: 490,
@@ -21,7 +21,7 @@ const PLANS = [
     color: 'text-blue-600',
     bg: 'bg-blue-50',
     border: 'border-blue-200',
-    features: ['50 documente/lună', 'Toate cele 13 tipuri de documente', 'Import CSV', 'Scanare pașapoarte (OCR)', 'Istoric dosare'],
+    features: ['50 dosare/lună', 'Toate cele 13 tipuri de documente', 'Import CSV', 'Scanare pașapoarte (OCR)', 'Istoric dosare'],
   },
   {
     key: 'pro',
