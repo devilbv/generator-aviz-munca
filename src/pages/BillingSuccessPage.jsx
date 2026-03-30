@@ -14,11 +14,7 @@ export default function BillingSuccessPage() {
   const credits = searchParams.get('credits')
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      await refetch()
-      setLoading(false)
-    }, 3000)
-    return () => clearTimeout(timer)
+    refetch().catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   return (

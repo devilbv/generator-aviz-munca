@@ -52,8 +52,9 @@ Deno.serve(async (req) => {
 
     if (session.mode === 'subscription') {
       const planKey = session.metadata?.plan_key || ''
-      const plan    = planKey.split('_')[0] || 'basic'
-      if (plan && plan !== 'free') {
+      const plan    = planKey.split('_')[0]
+      console.log('subscription checkout - planKey:', planKey, 'plan:', plan)
+      if (plan && ['starter', 'basic', 'pro', 'business'].includes(plan)) {
         await supabase.from('user_profiles').update({ plan, docs_this_month: 0, updated_at: new Date().toISOString() }).eq('id', userId)
       }
     }
@@ -65,10 +66,13 @@ Deno.serve(async (req) => {
     if (!userId) return new Response('OK')
 
     const planKey = sub.metadata?.plan_key || ''
-    const plan    = planKey.split('_')[0] || 'basic'
+    const plan    = planKey.split('_')[0]
     const period  = planKey.includes('yearly') ? 'yearly' : 'monthly'
+    console.log('subscription event - planKey:', planKey, 'plan:', plan)
 
-    await supabase.from('user_profiles').update({ plan, updated_at: new Date().toISOString() }).eq('id', userId)
+    if (plan && ['starter', 'basic', 'pro', 'business'].includes(plan)) {
+      await supabase.from('user_profiles').update({ plan, updated_at: new Date().toISOString() }).eq('id', userId)
+    }
     await supabase.from('subscriptions').upsert({
       user_id:                userId,
       stripe_subscription_id: sub.id,
