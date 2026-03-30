@@ -1,10 +1,13 @@
 import { useState } from 'react'
-import { Check, Zap, Building2, Star, CreditCard } from 'lucide-react'
+import { Check, Zap, Building2, Star, CreditCard, BarChart3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useBilling } from '@/hooks/useBilling'
 import { useAuth } from '@/context/AuthContext'
 import { Navigate } from 'react-router-dom'
 import BillingDetailsModal from '@/components/billing/BillingDetailsModal'
+
+const PLAN_LABELS = { free: 'Gratuit', basic: 'Basic', pro: 'Pro', business: 'Business' }
+const PLAN_LIMITS = { free: 0, basic: 50, pro: 200, business: -1 }
 
 const PLANS = [
   {
@@ -59,8 +62,10 @@ export default function PricingPage() {
   const [yearly, setYearly]   = useState(false)
   const [loading, setLoading] = useState({})
   const [billingModal, setBillingModal] = useState(null) // { type, key }
-  const { checkout, plan: currentPlan } = useBilling()
+  const { checkout, plan: currentPlan, credits, docsUsed, loading: billingLoading } = useBilling()
   const { session } = useAuth()
+
+  const docsLimit = PLAN_LIMITS[currentPlan]
 
   if (!session) return <Navigate to="/" replace />
 
@@ -85,6 +90,61 @@ export default function PricingPage() {
         />
       )}
       <div className="max-w-5xl mx-auto space-y-12">
+
+        {/* Planul curent */}
+        {!billingLoading && (
+          <div className="bg-white rounded-2xl border shadow-sm p-6 flex flex-col sm:flex-row sm:items-center gap-5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+              <BarChart3 className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1 space-y-3">
+              <div className="flex items-center gap-2">
+                <h2 className="font-semibold text-gray-900">Planul tău curent</h2>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary capitalize">
+                  {PLAN_LABELS[currentPlan]}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-6">
+                {currentPlan === 'free' ? (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-0.5">Dosare gratuite rămase</p>
+                    <p className="text-2xl font-bold text-gray-900">{credits}</p>
+                  </div>
+                ) : docsLimit === -1 ? (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-0.5">Dosare generate</p>
+                    <p className="text-2xl font-bold text-gray-900">{docsUsed} <span className="text-sm font-normal text-gray-400">/ nelimitat</span></p>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-0.5">Dosare luna aceasta</p>
+                      <p className="text-2xl font-bold text-gray-900">{docsUsed} <span className="text-sm font-normal text-gray-400">/ {docsLimit}</span></p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-0.5">Rămase</p>
+                      <p className="text-2xl font-bold text-green-600">{Math.max(0, docsLimit - docsUsed)}</p>
+                    </div>
+                  </>
+                )}
+                {credits > 0 && currentPlan !== 'free' && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-0.5">Credite extra</p>
+                    <p className="text-2xl font-bold text-yellow-600">{credits}</p>
+                  </div>
+                )}
+              </div>
+              {currentPlan !== 'free' && docsLimit !== -1 && (
+                <div className="w-full bg-gray-100 rounded-full h-2">
+                  <div
+                    className="bg-primary rounded-full h-2 transition-all"
+                    style={{ width: `${Math.min(100, (docsUsed / docsLimit) * 100)}%` }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Header */}
         <div className="text-center space-y-4">
