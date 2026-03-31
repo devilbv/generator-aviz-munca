@@ -9,7 +9,7 @@ const PLAN_COLORS = { free: 'bg-gray-100 text-gray-600', basic: 'bg-blue-100 tex
 
 export default function Navbar() {
   const { user, signOut } = useAuth()
-  const { plan, planLabel, docsUsed, docsLimit, credits, loading } = useBilling()
+  const { plan, planLabel, docsUsed, docsLimit, credits, freeCredits, loading } = useBilling()
   const navigate = useNavigate()
 
   const handleSignOut = async () => {
@@ -24,7 +24,7 @@ export default function Navbar() {
 
   if (!user) return null
 
-  const showWarning = docsLimit !== -1 && !loading && (docsUsed >= docsLimit && credits === 0)
+  const showWarning = !loading && plan === 'free' && freeCredits === 0 && credits === 0
 
   return (
     <>
@@ -53,14 +53,14 @@ export default function Navbar() {
                 <span className={`hidden sm:inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full cursor-pointer hover:opacity-80 transition ${PLAN_COLORS[plan] || PLAN_COLORS.free}`}>
                   <Zap className="h-3 w-3" />
                   {plan === 'free'
-                    ? `Gratuit · ${credits} dosare`
+                    ? `Gratuit · ${freeCredits} dosare`
                     : `${planLabel}${docsLimit !== -1 ? ` · ${docsUsed}/${docsLimit}` : ''}`}
                 </span>
               </Link>
             )}
 
-            {/* Credite extra (doar pentru planuri platite) */}
-            {!loading && plan !== 'free' && credits > 0 && (
+            {/* Credite cumparate */}
+            {!loading && credits > 0 && (
               <span className="hidden sm:inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-700">
                 <CreditCard className="h-3 w-3" /> {credits} credite
               </span>

@@ -24,9 +24,9 @@ export function useBilling() {
 
   const canGenerate = () => {
     if (!profile) return false
-    const limit = PLAN_LIMITS[profile.plan] ?? 5
+    const limit = PLAN_LIMITS[profile.plan] ?? 0
     if (limit === -1) return true
-    // Verifica reset lunar
+    if (limit === 0) return (profile.free_credits || 0) > 0 || (profile.credits || 0) > 0
     const resetAt = new Date(profile.month_reset_at)
     const now     = new Date()
     if (now.getFullYear() !== resetAt.getFullYear() || now.getMonth() !== resetAt.getMonth()) return true
@@ -43,8 +43,10 @@ export function useBilling() {
     const sameMonth = now.getFullYear() === resetAt.getFullYear() && now.getMonth() === resetAt.getMonth()
 
     if (limit === 0) {
-      // Plan free - foloseste doar credite
-      if ((profile.credits || 0) > 0) {
+      // Plan free - foloseste free_credits mai intai, apoi credite cumparate
+      if ((profile.free_credits || 0) > 0) {
+        await supabase.from('user_profiles').update({ free_credits: profile.free_credits - 1 }).eq('id', user.id)
+      } else if ((profile.credits || 0) > 0) {
         await supabase.from('user_profiles').update({ credits: profile.credits - 1 }).eq('id', user.id)
         await supabase.from('credit_transactions').insert({
           user_id: user.id, amount: -1, type: 'usage', description: 'Generare document',
@@ -68,11 +70,12 @@ export function useBilling() {
     await fetchProfile()
   }
 
-  const docsUsed  = profile?.docs_this_month || 0
-  const docsLimit = PLAN_LIMITS[profile?.plan || 'free']
-  const credits   = profile?.credits || 0
-  const plan      = profile?.plan || 'free'
-  const planLabel = PLAN_LABELS[plan]
+  const docsUsed    = profile?.docs_this_month || 0
+  const docsLimit   = PLAN_LIMITS[profile?.plan || 'free']
+  const credits     = profile?.credits || 0
+  const freeCredits = profile?.free_credits || 0
+  const plan        = profile?.plan || 'free'
+  const planLabel   = PLAN_LABELS[plan]
 
   const checkout = async (type, priceKey) => {
     try {
@@ -93,5 +96,5 @@ export function useBilling() {
     }
   }
 
-  return { profile, loading, canGenerate, recordUsage, docsUsed, docsLimit, credits, plan, planLabel, checkout, refetch: fetchProfile }
+  return { profile, loading, canGenerate, recordUsage, docsUsed, docsLimit, credits, freeCredits, plan, planLabel, checkout, refetch: fetchProfile }
 }

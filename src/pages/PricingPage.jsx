@@ -62,7 +62,7 @@ export default function PricingPage() {
   const [yearly, setYearly]   = useState(false)
   const [loading, setLoading] = useState({})
   const [billingModal, setBillingModal] = useState(null) // { type, key }
-  const { checkout, plan: currentPlan, credits, docsUsed, loading: billingLoading } = useBilling()
+  const { checkout, plan: currentPlan, credits, freeCredits, docsUsed, loading: billingLoading } = useBilling()
   const { session } = useAuth()
 
   const docsLimit = PLAN_LIMITS[currentPlan]
@@ -106,10 +106,18 @@ export default function PricingPage() {
               </div>
               <div className="flex flex-wrap gap-6">
                 {currentPlan === 'free' ? (
-                  <div>
-                    <p className="text-xs text-gray-400 mb-0.5">Dosare gratuite rămase</p>
-                    <p className="text-2xl font-bold text-gray-900">{credits}</p>
-                  </div>
+                  <>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-0.5">Dosare gratuite rămase</p>
+                      <p className="text-2xl font-bold text-gray-900">{freeCredits}</p>
+                    </div>
+                    {credits > 0 && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-0.5">Credite cumpărate</p>
+                        <p className="text-2xl font-bold text-yellow-600">{credits}</p>
+                      </div>
+                    )}
+                  </>
                 ) : docsLimit === -1 ? (
                   <div>
                     <p className="text-xs text-gray-400 mb-0.5">Dosare generate</p>
@@ -129,7 +137,7 @@ export default function PricingPage() {
                 )}
                 {credits > 0 && currentPlan !== 'free' && (
                   <div>
-                    <p className="text-xs text-gray-400 mb-0.5">Credite extra</p>
+                    <p className="text-xs text-gray-400 mb-0.5">Credite cumpărate</p>
                     <p className="text-2xl font-bold text-yellow-600">{credits}</p>
                   </div>
                 )}
