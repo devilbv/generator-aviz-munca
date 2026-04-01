@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="border-t bg-white mt-auto">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
         <p className="text-xs text-gray-400">
-          © {new Date().getFullYear()} Web Digital Venture SRL · CUI 46880060
+          © {new Date().getFullYear()} Web Digital Venture SRL
         </p>
         <div className="flex items-center gap-4 text-xs text-gray-500">
           <Link to="/termeni" className="hover:text-primary transition-colors">Termeni și Condiții</Link>
