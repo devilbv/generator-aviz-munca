@@ -50,10 +50,10 @@ export default function Navbar() {
             {/* Badge plan */}
             {!loading && (
               <Link to="/pricing">
-                <span className={`hidden sm:inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full cursor-pointer hover:opacity-80 transition ${PLAN_COLORS[plan] || PLAN_COLORS.free}`}>
+                <span className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full cursor-pointer hover:opacity-80 transition ${PLAN_COLORS[plan] || PLAN_COLORS.free}`}>
                   <Zap className="h-3 w-3" />
                   {plan === 'free'
-                    ? `Gratuit · ${freeCredits} dosare`
+                    ? `Gratuit · ${freeCredits}`
                     : `${planLabel}${docsLimit !== -1 ? ` · ${docsUsed}/${docsLimit}` : ''}`}
                 </span>
               </Link>
@@ -61,8 +61,8 @@ export default function Navbar() {
 
             {/* Credite cumparate */}
             {!loading && credits > 0 && (
-              <span className="hidden sm:inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-700">
-                <CreditCard className="h-3 w-3" /> {credits} credite
+              <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-700">
+                <CreditCard className="h-3 w-3" /> {credits}
               </span>
             )}
 
