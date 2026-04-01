@@ -74,8 +74,9 @@ export default function Navbar() {
             </Link>
 
             <Link to="/pricing">
-              <Button variant="ghost" size="sm" className="gap-1 hidden sm:flex">
-                <Zap className="h-4 w-4" /> Upgrade
+              <Button variant="ghost" size="sm" className="gap-1">
+                <Zap className="h-4 w-4" />
+                <span className="hidden sm:inline">Upgrade</span>
               </Button>
             </Link>
 
